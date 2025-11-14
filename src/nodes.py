@@ -24,3 +24,43 @@ def extract_markdown_images(text):
 
 def extract_markdown_links(text):
     return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+
+def split_nodes_image(old_nodes):
+    output =[]
+    for node in old_nodes:
+        string = node.text
+        alt_url = extract_markdown_images(string)
+        i = 0
+        while string != "":
+            temp = string.split("!", 1)
+            string = string.removeprefix(temp[0])
+            temp[0] =temp[0].lstrip(")")
+            if temp[0] != "":
+                output.append(TextNode(temp[0], TextType.TEXT, None))
+            temp = string.split(")", 1)
+            string = string.removeprefix(temp[0])
+            if i < len(alt_url):
+                output.append(TextNode(alt_url[i][0], TextType.IMAGE, alt_url[i][1]))
+            i += 1
+
+        return output
+
+def split_nodes_link(old_nodes):
+    output = []
+    for node in old_nodes:
+        string = node.text
+        alt_url = extract_markdown_links(string)
+        i = 0
+        while string != "":
+            temp = string.split("[", 1)
+            string = string.removeprefix(temp[0])
+            temp[0] = temp[0].lstrip(")")
+            if temp[0] != "":
+                output.append(TextNode(temp[0], TextType.TEXT, None))
+            temp = string.split(")", 1)
+            string = string.removeprefix(temp[0])
+            if i < len(alt_url):
+                output.append(TextNode(alt_url[i][0], TextType.LINK, alt_url[i][1]))
+            i += 1
+
+        return output
